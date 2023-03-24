@@ -12,7 +12,7 @@ Dockerfile is the file that's used to build the projects image. It was pushed to
 The structure of the project is as follows:  
     A txt file gets uploaded to a source bucket in s3.  
     A lambda function gets triggered and sends a "mission" to SQS.  
-    The code pulls missions from SQS, converts txt to pdf, uploads the pdf to a destenation bucket and sends an email using SNS with a presigned url of the object in the       destenation bucket.  
+    There are 2 EC2 intances that are running a docker image that includes the code file txt2pdf. The code pulls missions from SQS, converts txt to pdf, uploads the pdf     to a destenation bucket and sends an email using SNS with a presigned url of the object in the destenation bucket.  
   
 Commands to run the docker image in the ec2 instances:  
   docker pull dinachoshha/txt2pdf:1  
