@@ -1,0 +1,138 @@
+Parameters:
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.0.0.0/16
+    
+  FirstPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first public subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.0.0/24
+    
+  SecondPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the second public subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.1.0/24
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Tags:
+        - Key: Name
+          Value: myVPC
+          
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: myIGW
+          
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+          
+  FirstPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref FirstPublicSubnetCIDR
+      Tags:
+        - Key: Name
+          Value: myFirstPublicSubnet
+
+  SecondPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref SecondPublicSubnetCIDR
+      Tags:
+        - Key: Name
+          Value: mySecondPublicSubnet
+
+  FirstPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: First Public Route Table
+
+  SecondPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Second Public Route Table
+
+  DefaultFirstPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref FirstPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  DefaultSecondPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref SecondPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  FirstPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref FirstPublicRouteTable
+      SubnetId: !Ref FirstPublicSubnet
+
+  SecondPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref SecondPublicRouteTable
+      SubnetId: !Ref SecondPublicSubnet
+
+      
+  SSHOnlySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "ssh-only-sg"
+      GroupDescription: "Security group with ssh only rule"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        CidrIp: 0.0.0.0/0
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+
+Outputs:
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+    Export:
+      Name: VPCOutput
+
+  FirstPublicSubnet:
+    Description: A reference to the created second Public Subnet
+    Value: !Ref FirstPublicSubnet
+    Export:
+      Name: FirstPublicSubnetOutput
+
+  SecondPublicSubnet:
+    Description: A reference to the created second Public Subnet
+    Value: !Ref SecondPublicSubnet
+    Export:
+      Name: SecondPublicSubnetOutput
+    
+  SSHOnlySecurityGroup:
+    Description: Security group with SSH only rule
+    Value: !Ref SSHOnlySecurityGroup
+    Export:
+      Name: securityGroupOutput

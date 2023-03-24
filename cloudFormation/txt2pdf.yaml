@@ -1,0 +1,82 @@
+Resources: 
+# maybe here i will have to change the acess policy to allow my ec2s to access the sqs (maybe not if i do it with the access keys of the sqs owner) 
+    MySqsQueue: 
+        Type: AWS::SQS::Queue
+        Properties: 
+            QueueName: "fileConvertMessagesSqs"
+    
+# create lambda function that adds messages to the sqs whenever there is a new txt file in the txtBucket.
+# when creating the lambda also create a policy and role to attach to the lambda
+    sendConvertFilesMassegeToSqsRole:
+        Type: "AWS::IAM::Role"
+        Properties: 
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                    - 
+                        Effect: "Allow"
+                        Principal: 
+                            Service: 
+                                - "lambda.amazonaws.com"
+                        Action: 
+                            - "sts:AssumeRole"
+                            
+    sendConvertFilesMassegeToSqsPolicy:
+        Type: AWS::IAM::Policy
+        Properties:
+            PolicyName: "sendConvertFilesMassegeToSqs"
+            PolicyDocument:  
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: 'sqs:SendMessage'
+                    Resource: !GetAtt  MySqsQueue.Arn
+                  - Effect: Allow
+                    Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                    Resource: '*'
+                  - Effect: Allow
+                    Action: ['s3:GetObject', 's3:PutObject', 's3:ListBucket']
+                    Resource: '*'
+            Roles:
+              - Ref: "sendConvertFilesMassegeToSqsRole"        
+
+    fileConvertMessagesSqs:        
+        Type: AWS::Lambda::Function
+        Properties:
+            Runtime: python3.9
+            Role: !GetAtt  sendConvertFilesMassegeToSqsRole.Arn
+            Handler: fileConvertMessagesSqs.fileConvertMessagesSqs.lambda_function.lambda_handler 
+            Code:
+                S3Bucket: file-convert-messages-sqs-lmbda
+                S3Key: fileConvertMessagesSqs.zip
+
+# create buckets for the txt and pdf files
+    txtBucket:
+        Type: AWS::S3::Bucket
+        DependsOn: fileConvertMessagesSqs
+        Properties:
+            BucketName: "source-txt-bucket-dina-choshha"
+            PublicAccessBlockConfiguration:
+                BlockPublicAcls: true
+                BlockPublicPolicy: true
+                IgnorePublicAcls: true
+                RestrictPublicBuckets: true
+
+    pdfBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: "destination-pdf-bucket-dina-choshha"
+            PublicAccessBlockConfiguration:
+                BlockPublicAcls: true
+                BlockPublicPolicy: true
+                IgnorePublicAcls: true
+                RestrictPublicBuckets: true
+
+# Create sns topic and sunbscribe to it.
+    snsTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+            TopicName: "ConvertedPdfsTopic"
+            Subscription:
+              - Endpoint: "dinachoshha@gmail.com"
+                Protocol: "email"
