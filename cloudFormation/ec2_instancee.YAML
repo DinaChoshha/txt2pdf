@@ -25,6 +25,10 @@ Resources:
           #!/bin/bash -xe
             sudo apt update
             sudo apt upgrade -y
+            curl -sfL https://get.docker.com -o docker.sh
+            chmod +x docker.sh
+            ./docker.sh
+            usermod -aG docker ubuntu
 
   secondpublicInstance: 
     Type: AWS::EC2::Instance
@@ -45,3 +49,7 @@ Resources:
           #!/bin/bash -xe
             sudo apt update
             sudo apt upgrade -y
+            curl -sfL https://get.docker.com -o docker.sh
+            chmod +x docker.sh
+            ./docker.sh
+            usermod -aG docker ubuntu
