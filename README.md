@@ -3,7 +3,7 @@ The project converts txt file to pdf.
   
 Folder cloudFormation templates contains all of the projects templates.  
   
-Folder s3LambdaZip contains the code of the lambda that's used in the project.  
+Folder s3LambdaZip contains the zip folder that is being used in the txt2pdf cloudformation template and the code file that's inside the zip folder.  
   
 txt2pdf.py is the python code using boto3 that is in charge of converting files. 
   
