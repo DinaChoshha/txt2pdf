@@ -14,7 +14,7 @@ The structure of the project is as follows:
     A lambda function gets triggered and sends a "mission" to SQS.  
     The code pulls missions from SQS, converts txt to pdf, uploads the pdf to a destenation bucket and send a email using SNS with a presigned url to the object in the       destenation bucket.  
   
-Commands to run the docker image in the ec2 instances:
+Commands to run the docker image in the ec2 instances:  
   docker pull dinachoshha/txt2pdf:1  
   docker run -it -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION  dinachoshha/txt2pdf:1 bash  
   python3 txt2pdf.py  
