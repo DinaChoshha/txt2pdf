@@ -28,7 +28,7 @@ Resources:
             curl -sfL https://get.docker.com -o docker.sh
             chmod +x docker.sh
             ./docker.sh
-            usermod -aG docker ubuntu
+            sudo usermod -aG docker ubuntu
 
   secondpublicInstance: 
     Type: AWS::EC2::Instance
@@ -52,4 +52,4 @@ Resources:
             curl -sfL https://get.docker.com -o docker.sh
             chmod +x docker.sh
             ./docker.sh
-            usermod -aG docker ubuntu
+            sudo usermod -aG docker ubuntu
