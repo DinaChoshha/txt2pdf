@@ -1,5 +1,4 @@
 Resources: 
-# maybe here i will have to change the acess policy to allow my ec2s to access the sqs (maybe not if i do it with the access keys of the sqs owner) 
     MySqsQueue: 
         Type: AWS::SQS::Queue
         Properties: 
